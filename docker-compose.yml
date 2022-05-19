@@ -1,25 +1,28 @@
 version: '3.5'
 services:
-  bitcoind:
-    image: ruimarinho/bitcoin-core
+  dogecoind:
+    image: dogecoin-core
+    build:
+      dockerfile: docker/dogecoind/Dockerfile
+      context: .
     ports:
       - 18443:18443
       - 18444:18444
     command:
-      -conf=/conf/bitcoin.conf
+      -conf=/conf/dogecoin.conf
       -printtoconsole
       -rest
       -rpcbind=0.0.0.0
       -rpcport=18443
       -server
     volumes:
-      - ./docker/bitcoind/conf:/conf
+      - ./docker/dogecoind/conf:/conf
   adapter:
     image: ic-btc-adapter
     build:
       dockerfile: docker/adapter/Dockerfile
       context: .
     depends_on:
-      - bitcoind
+      - dogecoind
     ports:
       - 34254:34254
