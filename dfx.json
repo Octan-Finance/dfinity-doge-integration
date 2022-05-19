@@ -1,5 +1,5 @@
 {
-  "dfx": "0.8.4",
+  "dfx": "0.10.0",
   "canisters": {
     "btc": {
       "type": "custom",
