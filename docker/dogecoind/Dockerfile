@@ -98,7 +98,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY entrypoint.py /usr/local/bin/entrypoint.py
+COPY docker/dogecoind/entrypoint.py /usr/local/bin/entrypoint.py
 RUN chmod 500 /usr/local/bin/entrypoint.py
 
 ENTRYPOINT ["entrypoint.py"]

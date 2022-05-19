@@ -3,7 +3,7 @@ FROM ubuntu:20.04 as builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG rust_version=1.55
-ARG ic_revision=99116f8e872b8765aa609f91eb8c9394914c483d
+ARG ic_revision=2f8508ead1e816cd8f40190113233777b13def12
 
 ENV TZ=UTC
 
@@ -25,7 +25,7 @@ RUN curl --fail https://sh.rustup.rs -sSf \
 
 ENV PATH=/cargo/bin:$PATH
 
-RUN git clone https://github.com/dfinity/ic.git && \
+RUN git clone https://github.com/Octan-Finance/dfinity-ic.git ic && \
     cd ic/rs && \
     git checkout ${ic_revision} && \
     cargo build -p ic-btc-adapter --release

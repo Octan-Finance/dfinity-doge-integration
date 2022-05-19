@@ -2,6 +2,6 @@
     "version": 70001,
     "network": "regtest",
     "nodes": [
-        "bitcoind:18444"
+        "dogecoind:18444"
     ]
 }
