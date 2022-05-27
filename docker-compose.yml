@@ -1,25 +1,22 @@
 version: '3.5'
 services:
   bitcoind:
-    image: ruimarinho/bitcoin-core
+    image: uphold/litecoin-core:latest
     ports:
-      - 18443:18443
-      - 18444:18444
+      - 19332:19332
+      - 19333:19333
+      - 19444:19444
     command:
-      -conf=/conf/bitcoin.conf
+      -conf=/conf/litecoin.conf
       -printtoconsole
-      -rest
-      -rpcbind=0.0.0.0
-      -rpcport=18443
-      -server
     volumes:
-      - ./docker/bitcoind/conf:/conf
-  adapter:
-    image: ic-btc-adapter
-    build:
-      dockerfile: docker/adapter/Dockerfile
-      context: .
-    depends_on:
-      - bitcoind
-    ports:
-      - 34254:34254
+      - ./docker/litecoind/conf:/conf
+  # adapter:
+  #   image: ic-btc-adapter
+  #   build:
+  #     dockerfile: docker/adapter/Dockerfile
+  #     context: .
+  #   depends_on:
+  #     - litecoind
+  #   ports:
+  #     - 34254:34254
