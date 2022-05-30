@@ -6,3 +6,6 @@ members = [
     "examples/rust",
     "types",
 ]
+
+[patch.crates-io]
+bitcoin = { git = "https://github.com/Octan-Finance/rust-litecoin", branch = "litecoin-compatible" }
