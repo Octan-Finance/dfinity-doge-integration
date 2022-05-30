@@ -152,8 +152,7 @@ checksum = "349f9b6a179ed607305526ca489b34ad0a41aed5f7980fa90eb03160b69598fb"
 [[package]]
 name = "bitcoin"
 version = "0.27.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a41df6ad9642c5c15ae312dd3d074de38fd3eb7cc87ad4ce10f90292a83fe4d"
+source = "git+https://github.com/Octan-Finance/rust-litecoin?branch=litecoin-compatible#bbf87bd8ba73d33ff76884b5a6358490e1050247"
 dependencies = [
  "bech32",
  "bitcoin_hashes",
