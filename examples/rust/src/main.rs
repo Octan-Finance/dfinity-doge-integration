@@ -1,5 +1,5 @@
-use bitcoin::{util::psbt::serialize::Serialize, Address, Network, PrivateKey};
-use example_common::{build_transaction, get_p2pkh_address, sign_transaction};
+use bitcoin::{util::psbt::serialize::Serialize, util::key::Error as BitcoinError, Address, Network, PublicKey, PrivateKey};
+use example_common::{build_transaction, get_p2pkh_address, get_ecdsa_public_key, sign_transaction};
 use ic_btc_types::{
     GetBalanceError, GetBalanceRequest, GetUtxosError, GetUtxosRequest, GetUtxosResponse, OutPoint,
     SendTransactionRequest, Utxo,
@@ -29,6 +29,8 @@ thread_local! {
     // The value here is initialized with a dummy value, which will be overwritten in `init`.
     static BTC_CANISTER_ID: RefCell<Principal> = RefCell::new(Principal::management_canister());
 
+    static BTC_PUBLIC_KEY: RefCell<Result<PublicKey, BitcoinError>> = RefCell::new(PublicKey::from_slice("dummy".as_bytes()));
+
     // A cache of spent outpoints. Needed to avoid double spending.
     static SPENT_TXOS: RefCell<HashSet<OutPoint>> = RefCell::new(HashSet::new());
 }
@@ -39,11 +41,22 @@ struct InitPayload {
 }
 
 #[init]
-fn init(payload: InitPayload) {
+async fn init(payload: InitPayload) {
     BTC_CANISTER_ID.with(|id| {
         // Set the ID fo the bitcoin canister.
         id.replace(payload.bitcoin_canister_id);
-    })
+    });
+    BTC_PUBLIC_KEY.with(|result| {
+        async move {
+            match get_ecdsa_public_key().await {
+                Ok(vec_u8_public_key) => {
+                    print(&format!("Receive vec_u8_public_key {:?}", vec_u8_public_key));
+                    result.replace(PublicKey::from_slice(&vec_u8_public_key[..]))
+                },
+                Err(_err) => { PublicKey::from_slice("dummy1".as_bytes()) },
+            }
+        };
+    });
 }
 
 /// Returns the regtest P2PKH address derived from the private key as a string.
@@ -125,6 +138,8 @@ pub async fn balance() -> u64 {
 ///  * A dust threshold of 10k satoshis is used.
 #[update]
 pub async fn send(amount: u64, destination: String) {
+    // let haha = get_ecdsa_public_key().await;
+
     let fees: u64 = 10_000;
 
     if amount <= fees {
@@ -192,6 +207,7 @@ pub async fn send(amount: u64, destination: String) {
 
 // Returns the regtest P2PKH address derived from the private key.
 fn btc_address() -> Address {
+    // Generate btc address from public key BTC_PUBLIC_KEY
     BTC_PRIVATE_KEY.with(|private_key| get_p2pkh_address(&private_key.borrow(), Network::Regtest))
 }
 

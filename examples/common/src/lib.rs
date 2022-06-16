@@ -4,14 +4,82 @@ use bitcoin::{
     blockdata::script::Builder,
     hashes::Hash,
     secp256k1::{Message, Secp256k1},
-    Address, AddressType, Network, OutPoint, PrivateKey, Script, SigHashType, Transaction, TxIn,
+    Address, AddressType, Network, OutPoint, PublicKey, PrivateKey, Script, SigHashType, Transaction, TxIn,
     TxOut, Txid,
 };
 use ic_btc_types::Utxo;
-use ic_cdk::print;
+use ic_cdk::{
+    call,
+    export::{
+        candid::{CandidType},
+        serde::{Deserialize, Serialize as SerializeNew},
+        Principal
+    },
+    print
+};
+use std::str::FromStr;
 
 // The signature hash type that is always used.
 const SIG_HASH_TYPE: SigHashType = SigHashType::All;
+
+#[derive(CandidType, SerializeNew, Debug, Clone)]
+pub enum EcdsaCurve {
+    #[serde(rename = "secp256k1")]
+    Secp256k1,
+}
+
+#[derive(CandidType, SerializeNew, Debug, Clone)]
+struct EcdsaKeyId {
+    pub curve: EcdsaCurve,
+    pub name: String,
+}
+
+#[derive(CandidType, SerializeNew, Debug)]
+struct ECDSAPublicKey {
+    pub canister_id: Option<CanisterId>,
+    pub derivation_path: Vec<Vec<u8>>,
+    pub key_id: EcdsaKeyId,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+struct ECDSAPublicKeyReply {
+    pub public_key: Vec<u8>,
+    pub chain_code: Vec<u8>,
+}
+
+type CanisterId = Principal;
+
+pub async fn get_ecdsa_public_key() -> Result<Vec<u8>, String> {
+    print(&format!("TESTTTTTT 123: {:?}", "dau xanh"));
+
+    let key_id = EcdsaKeyId {
+        curve: EcdsaCurve::Secp256k1,
+        name: "".to_string(),
+    };
+    let thecdsa_canister_id = std::env!("CANISTER_ID_ic00");
+    let thecdsa = CanisterId::from_str(&thecdsa_canister_id).unwrap();
+
+    ic_cdk::println!("thecdsa_canister_id = {:?}", thecdsa_canister_id);
+    ic_cdk::println!("thecdsa = {:?}", thecdsa);
+
+    let publickey: Vec<u8> = {
+        let request = ECDSAPublicKey {
+            canister_id: None,
+            derivation_path: vec![vec![2, 3]],
+            key_id: key_id.clone(),
+        };
+        ic_cdk::println!("Sending signature request = {:?}", request);
+        let (res,): (ECDSAPublicKeyReply,) = call(thecdsa, "ecdsa_public_key", (request,))
+            .await
+            .map_err(|e| format!("Failed to call ecdsa_public_key {}", e.1))?;
+        ic_cdk::println!("Got response = {:?}", res);
+        res.public_key
+    };
+
+    print(&format!("publickey: {:?}", publickey));
+
+    Ok(publickey)
+}
 
 pub fn get_p2pkh_address(private_key: &PrivateKey, network: Network) -> Address {
     let public_key = private_key.public_key(&Secp256k1::new());

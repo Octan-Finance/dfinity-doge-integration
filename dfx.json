@@ -1,6 +1,11 @@
 {
   "dfx": "0.8.4",
   "canisters": {
+    "ic00": {
+      "candid": "examples/ic00/ecdsa.did",
+      "wasm": "examples/ic00/mock.wasm",
+      "type": "custom"
+    },
     "btc": {
       "type": "custom",
       "candid": "canister/candid.did",
@@ -11,7 +16,10 @@
       "type": "custom",
       "candid": "examples/rust/candid.did",
       "wasm": "target/wasm32-unknown-unknown/release/example.wasm",
-      "build": "scripts/build-example.sh"
+      "build": "scripts/build-example.sh",
+      "dependencies": [
+        "ic00"
+      ]
     },
     "btc-example-common": {
       "type": "custom",
